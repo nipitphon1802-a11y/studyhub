@@ -183,11 +183,19 @@ const load=(k,d)=>{try{const x=JSON.parse(localStorage.getItem(k));return x==nul
 const save=()=>{try{localStorage.setItem(K.v,JSON.stringify(videos));localStorage.setItem(K.s,JSON.stringify(customSubjects));localStorage.setItem(K.c,JSON.stringify(chanSub));localStorage.setItem(K.t,JSON.stringify(trash))}catch(e){}};
 
 let videos=load(K.v,null),customSubjects=load(K.s,[]),chanSub=load(K.c,null),trash=load(K.t,[]);
+const START_CLIP={title:'คลิปแรกของ StudyHub',channel:'YouTube',subject:'คณิตศาสตร์',desc:"กดปุ่ม 'เพิ่มคลิป' เพื่อใส่คลิปจริงของเรา",url:'https://youtu.be/f9ZbwAWdoGA'};
 if(!videos){
-  videos=[{id:'v'+Date.now(),title:'ตัวอย่างคลิป — ลบรายการนี้แล้วใส่คลิปของเรา',channel:'Rick Astley 😎',subject:'คณิตศาสตร์',desc:"กดปุ่ม 'เพิ่มคลิป' เพื่อใส่คลิปจริงของเรา",url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',added:Date.now()}];
-  chanSub={'Rick Astley 😎':'คณิตศาสตร์'};save();
+  videos=[{id:'v'+Date.now(),...START_CLIP,added:Date.now()}];
+  chanSub={[START_CLIP.channel]:START_CLIP.subject};save();
 }
 chanSub=chanSub||{};
+// ย้ายคลิปตัวอย่างเดิม (Rickroll) ในเครื่องที่เคยเปิดไว้แล้ว ให้เป็นคลิปเริ่มต้นใหม่
+videos.forEach(v=>{
+  if(v.url&&v.url.includes('dQw4w9WgXcQ')&&v.channel==='Rick Astley 😎'){
+    if(chanSub[v.channel]!==undefined){chanSub[START_CLIP.channel]=chanSub[START_CLIP.channel]||chanSub[v.channel];delete chanSub[v.channel]}
+    Object.assign(v,START_CLIP);save();
+  }
+});
 let curSub='ทั้งหมด',curChan=null,showTrash=false;
 
 const $=id=>document.getElementById(id);
